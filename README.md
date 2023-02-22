@@ -36,5 +36,5 @@
 - 실험은 조이스틱을 이용하여 타겟을 추적하는 간단한 실험으로 진행하였다.
 <br><br>
 
-<img src="./img/experiment.jpg" width="350" height="200"/>
+<img src="./README/experiment.jpg" width="350" height="200"/>
 
