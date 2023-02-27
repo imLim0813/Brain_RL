@@ -1,7 +1,6 @@
-import os, gym, cv2, time
+import gym, cv2
 import pygame as G
 import numpy as np
-import matplotlib.pyplot as plt
 
 from pathlib import Path
 from Env.object_env import *
@@ -16,7 +15,8 @@ class Load(Parameters, gym.Env):
     def __init__(self):
         """
         Description:
-            게임환경 구축을 위한 함수.
+            게임환경 구축을 위한 함수
+
         """
         super().__init__()
         self.clock = G.time.Clock()
@@ -27,7 +27,7 @@ class Load(Parameters, gym.Env):
 
         visible_mouse(False)
 
-        self.root_dir = '/Users/imlim/Documents/Project/Human_Brain_Analysis'
+        self.root_dir = '/Users/imlim/Documents/Project/BRAIN_RL'
         self.path = np.load(Path(self.root_dir, 'Data', 'total_path.npy')).astype('int')
         self.done = False
         self.count = 0
@@ -44,8 +44,7 @@ class Load(Parameters, gym.Env):
         self.observation_space = gym.spaces.Box(low=obs_low, high=obs_high, shape=(2,), dtype=np.float)
 
         # State space 정의
-        self.state = np.array([self.init_x, self.init_y,
-                               self.init_x, self.init_y], dtype=np.float)
+        self.state = np.array([self.init_x, self.init_y, self.init_x, self.init_y], dtype=np.float)
 
         self.action = None
 
@@ -58,7 +57,7 @@ class Load(Parameters, gym.Env):
 
         """
         target = self.target.move(self.path, idx=self.count)
-        
+
         self.action = np.array([r[0] * 6, theta[0] * 180])
         cursor = self.cursor.move('base', self.action)
 
@@ -99,9 +98,8 @@ class Load(Parameters, gym.Env):
 
         """
         self.render()
-        string_image = G.image.tostring(self.screen.screen, 'RGB')
-        temp_surf = G.image.fromstring(string_image, (self.width, self.height), 'RGB')
-        tmp = G.surfarray.array3d(temp_surf)
+        tmp = G.surfarray.array3d(self.screen.screen)
+        
         # (W, H, C) -> (H, W, C)
         tmp = tmp.transpose((1, 0, 2))
 
@@ -119,6 +117,7 @@ class Load(Parameters, gym.Env):
         """
         Description:
             게임정보를 디스플레이 하기위한 함수
+            
         """
         # If don't use this, the console window is not the same with the state.
         G.event.pump()
