@@ -1,17 +1,15 @@
+import torch
 import numpy as np
 import matplotlib.pyplot as plt
 
 from pathlib import Path
 from Env import environment
-from Model import TD3
+from Model import TD3_DQN, TD3_DQN_2, TD3_DQN_Orig
 from itertools import count
-import torch
+from torchvision.transforms import transforms
 
 def train_model(epochs, start_train, frame_size, env, agent, directory, batch_size):
     reward_list = []
-    patience = 30
-    es_count = 0
-
     for epoch in range(epochs):
         total_reward = 0
         env.reset()
@@ -60,20 +58,14 @@ def train_model(epochs, start_train, frame_size, env, agent, directory, batch_si
 
         reward_list.append(total_reward)
 
-        if epoch > start_train:
-            agent.update(batch_size, epoch-start_train)
-
         if epoch > start_train and total_reward == max(reward_list):
             agent.save(directory=str(directory), epoch=epoch)
             agent.save(directory=str(directory), epoch='Best')
 
-        # early stopping
-        if len(reward_list) > 2 and (reward_list[-1] < reward_list[-2]):
-            es_count += 1
-        else:
-            es_count = 0
+        if epoch > start_train:
+            agent.update(batch_size, epoch)
 
-        if es_count > patience:
+        if total_reward > 29000:
             np.save(Path(directory, f'Learning_Curve.npy'), reward_list)
             break
 
@@ -103,7 +95,7 @@ def test_model(frame_size, env, agent, directory, device):
             for _ in range(4):
                 RL_pos.append(env.state)
                 RL_action.append([action_r, action_theta])
-                next_tmp, reward_tmp, done, _ = env.step(action_r, action_theta)
+                next_tmp, reward_tmp, done = env.step(action_r, action_theta)
                 next_tmp = env.to_frame(frame_size, frame_size).squeeze().copy() / 255
                 next_state.append(next_tmp)
                 reward += reward_tmp
@@ -117,6 +109,7 @@ def test_model(frame_size, env, agent, directory, device):
                 break
 
             state = next_state.copy()
+
     RL_action = np.array(RL_action).squeeze()
     np.save(Path(directory, 'DRL_action.npy'), np.array(RL_action))
     np.save(Path(directory, 'DRL_position.npy'), np.array(RL_pos))
@@ -125,17 +118,16 @@ def test_model(frame_size, env, agent, directory, device):
 if __name__ == '__main__':
 
     env = environment.Load()
-    agent = TD3.make_model()
     root_dir = '/Users/imlim/Documents/Project/BRAIN_RL'
-
     model_name = input("Please Enter the model's name : ")
+    agent = eval(model_name).make_model()
 
     directory = Path(root_dir, 'Result', 'DRL_model', model_name)
     directory.mkdir(exist_ok=True, parents=True)
 
     device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
     max_episode = 10000
-    start_train = 0
+    start_train = 100
     batch_size = 128
     tau = 0.01
     frame_size = 84
