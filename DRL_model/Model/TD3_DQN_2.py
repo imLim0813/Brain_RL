@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from copy import deepcopy
 from pathlib import Path
 
 
@@ -19,7 +20,7 @@ class Replay_buffer:
         else:
             self.storage.append(data)
 
-    def sample(self, batch_size):
+    def sample(self, batch_size: int) -> np.ndarray:
 
         index = np.random.randint(0, len(self.storage), size=batch_size)
         x, y, u, r, d = [], [], [], [], []
@@ -36,27 +37,27 @@ class Replay_buffer:
 
 
 class ConvNet(nn.Module):
-    def __init__(self, frame_size):
+    def __init__(self):
         super(ConvNet, self).__init__()
 
-        self.frame_size = frame_size
         self.conv1 = nn.Conv2d(in_channels=4, out_channels=32, kernel_size=8, stride=4, padding='valid')
         self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=4, stride=2, padding='valid')
         self.conv3 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1, padding='valid')
         self.conv4 = nn.Conv2d(in_channels=64, out_channels=512, kernel_size=7, stride=1, padding='valid')
 
         self.flatten = nn.Flatten()
+
         self.initialize_weights()
 
-    def forward(self, x):
-        x = x.reshape((-1, 4, self.frame_size, self.frame_size))
+    def forward(self, input_):
+        input_ = input_.unsqueeze(0) if input_.ndim != 4 else input_
 
-        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv1(input_))
         x = F.relu(self.conv2(x))
         x = F.relu(self.conv3(x))
         x = F.relu(self.conv4(x))  # [-1, 512]
 
-        x = self.flatten(x)
+        x = x.view(input_.size(1) * input_.size(0) // 4, -1)
 
         return x
 
@@ -81,8 +82,7 @@ class Actor(nn.Module):
 
         self.fc1 = nn.Linear(s_dim, 200)
         self.fc2 = nn.Linear(200, 100)
-        self.action_r = nn.Linear(100, 1)
-        self.action_theta = nn.Linear(100, 1)
+        self.action = nn.Linear(100, 2)
         self.initialize_weights()
 
     def forward(self, x):
@@ -91,11 +91,8 @@ class Actor(nn.Module):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
 
-        action_r = torch.sigmoid(self.action_r(x))
-        action_theta = torch.tanh(self.action_theta(x))
-
-        action = torch.cat([action_r, action_theta], dim=1)
-
+        action = self.action(x)
+        action = torch.cat([torch.sigmoid(action[:, 0]).unsqueeze(1), torch.tanh(action[:, 1]).unsqueeze(1)], dim=1)
         return action
 
     def initialize_weights(self):
@@ -112,6 +109,7 @@ class Actor(nn.Module):
                 nn.init.constant_(m.bias, 0)
 
 
+# Critic
 class Critic(nn.Module):
     def __init__(self, s_dim, a_dim, model):
         super(Critic, self).__init__()
@@ -163,16 +161,17 @@ class Critic(nn.Module):
 
 
 class TD3(object):
-    def __init__(self, state_dim, action_dim, action_lr, critic_lr, model1, model2, device):
-        self.device = device
 
-        self.actor = Actor(state_dim, model1).to(device)
-        self.actor_target = Actor(state_dim, model1).to(device)
+    def __init__(self, state_dim, action_dim, action_lr, critic_lr, model, device):
+        self.device = device
+        
+        self.actor = Actor(state_dim, model).to(self.device)
+        self.actor_target = deepcopy(self.actor)
         self.actor_target.load_state_dict(self.actor.state_dict())
         self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=action_lr)
 
-        self.critic = Critic(state_dim, action_dim, model2).to(device)
-        self.critic_target = Critic(state_dim, action_dim, model2).to(device)
+        self.critic = Critic(state_dim, action_dim, model).to(self.device)
+        self.critic_target = deepcopy(self.critic)
         self.critic_target.load_state_dict(self.critic.state_dict())
         self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), lr=critic_lr)
 
@@ -195,7 +194,9 @@ class TD3(object):
         return action.cpu().data.numpy().flatten()
 
     def update(self, batch_size, iterations, discount=0.99, tau=0.005, policy_noise=0.2, noise_clip=0.5, policy_freq=2):
+
         for it in range(iterations):
+
             x, y, u, r, d = self.replay_buffer.sample(batch_size=batch_size)
             state = torch.FloatTensor(x).to(self.device)
             next_state = torch.FloatTensor(y).to(self.device)
@@ -274,15 +275,13 @@ def make_model():
     torch.backends.cudnn.benchmark = False
     np.random.seed(SEED)
 
-    frame_size = 84
     state_dim = 512
     action_dim = 2
-    action_lr = 3e-4
-    critic_lr = 3e-4
+    action_lr = 1e-4
+    critic_lr = 1e-4
     device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
-    actor_model = ConvNet(frame_size)
-    critic_model = ConvNet(frame_size)
-    agent = TD3(state_dim, action_dim, action_lr, critic_lr, actor_model, critic_model, device)
+    conv_model = ConvNet()
+    agent = TD3(state_dim, action_dim, action_lr, critic_lr, conv_model, device)
 
     return agent
