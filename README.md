@@ -59,6 +59,8 @@
 
 : 본 프로젝트는 사람의 뇌 데이터와 강화학습 모델의 출력 간 상관관계를 구하는 것이다. 이 과정은 강화학습을 사람과 동일한 실험에 대해 학습시키고, 출력 값을 추출하기 위해 진행하였다.
 
+: 강화학습 알고리즘으로 Twin Delayed Deep Deterministic policy gradient (TD3)를 사용하였다.
+
 ### 2. 게임 환경 구성
 
 #### State
@@ -105,7 +107,7 @@
 <img src="./README/trained_VE.png" width="60%" height="60%"/>
 <br>
 
-#### 학습된 모델과 뇌 데이터 간의 상관관계
+#### 학습되지 않은 모델과 뇌 데이터 간의 상관관계
 <img src="./README/untrained_VE.png"  width="60%" height="60%"/>
 
 ### 2. 표현 유사 분석
