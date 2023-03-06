@@ -28,7 +28,7 @@
 ### 1. 실험 개요
 
 - 본 프로젝트는 사람의 뇌 데이터와 강화학습 모델의 출력 간 상관관계를 구하는 것이다. 이 과정은 사람의 뇌 데이터를 수집하기 위해 진행하였다.
-<br><br>
+<br>
 
 <img src="./README/experiment.jpg" width="350" height="200"/>
 
@@ -75,17 +75,14 @@
 - action : 극 좌표계인 2차원 벡터 $r$, $\theta$로 구성하였고, 행동의 범위는 $0 < r < 1$,$-1 < \theta < 1$ 이다.
 
 - reward : 타겟과 커서 간의 유클리디안 거리를 가우시안 함수의 입력으로 사용하여 얻은 출력 값으로 정의하였다. 이 보상의 범위는 $0 < reward < 1$ 이다. 정규 분포 함수의 파라미터인 $\sigma = 100$ 으로 설정하였다.
-<br><br>
 
 <img src="./README/reward.png" width="340" height="200"/>
-<br><br>
 
 ### 3. 입력 데이터 전처리
 
 - 사람이 어떤 시각적인 정보를 볼 때 모든 영역을 동일한 가치를 두는 것이 아닌 핵심적인 정보를 담고 있는 영역에 더욱 가치를 둔다는 attention에서 영감을 얻어 이미지 Cropping을 진행하였다. (1920 x 1080 이미지를 84 x 84로 Cropping)
-<br><br>
 
-<img src="./README/image preproc.png" width="350" height="100"/>
-<br><br>
+<img src="./README/image preproc.png" width="500" height="150"/>
 
-### 4.
+### 4. 강화학습 모델 구조
+<img src="./README/Network Architecture.png">
