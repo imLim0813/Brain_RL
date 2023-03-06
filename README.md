@@ -19,12 +19,12 @@
 ### 1. 실험 개요
 
 : 본 프로젝트는 사람의 뇌 데이터와 강화학습 모델의 출력 간 상관관계를 구하는 것이다. 이 과정은 사람의 뇌 데이터를 수집하기 위해 진행하였다.
-
+<br>
 ### 2. 실험 환경
 
 : 본 실험의 목적은 게임을 수행하는 도중, 사람 피험자의 뇌 데이터를 fMRI 장비를 이용하여 수집하는 것이다.
 : 이를 위해, 성균관대학교 CNIR의 3T MRI 장비를 이용하였다.
-
+<br>
 ### 3. fMRI specification
 
 | Specification   | Value                 |
@@ -94,11 +94,11 @@
 #### 결과 : 학습된 모델을 입력으로한 회귀 모델의 예측 값이 사람이 행동을 할 때 활성화되는 영역과 상관관계가 높은 반면, 학습되지 않은 강화학습 모델은 그렇지 않았다.
 
 #### 학습된 모델과 뇌 데이터 간의 상관관계
-<img src="./README/trained_VE.png">
+<img src="./README/trained_VE.png" width="60%" height="60%"/>
 <br>
 
 #### 학습된 모델과 뇌 데이터 간의 상관관계
-<img src="./README/untrained_VE.png" >
+<img src="./README/untrained_VE.png"  width="60%" height="60%"/>
 
 ### 2. 표현 유사 분석
 
@@ -106,9 +106,9 @@
 
 #### 결과 : 위계적인 정보 처리 방식은 보이지 못하였으나, 학습된 모델이 그렇지 않은 모델보다 유의미한 차이로 뇌 데이터와 상관관계가 존재했다.
 
-<img src="./README/early_visual.png">
+<img src="./README/early_visual.png" width="60%" height="60%"/>
 <br>
-<img src="./README/ppc.png">
+<img src="./README/ppc.png" width="60%" height="60%"/>
 <br>
-<img src="./README/motor_cortex.png">
+<img src="./README/motor_cortex.png" width="60%" height="60%"/>
 <br>
