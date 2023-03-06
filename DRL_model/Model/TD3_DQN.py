@@ -82,9 +82,10 @@ class Actor(nn.Module):
         super(Actor, self).__init__()
         self.conv = model
 
-        self.fc1 = nn.Linear(s_dim, 200)
-        self.fc2 = nn.Linear(200, 100)
-        self.action = nn.Linear(100, 2)
+        self.fc1 = nn.Linear(s_dim, 256)
+        self.fc2 = nn.Linear(256, 128)
+        self.action_r = nn.Linear(128, 1)
+        self.action_theta = nn.Linear(128, 1)
         self.initialize_weights()
 
     def forward(self, x):
@@ -93,8 +94,11 @@ class Actor(nn.Module):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
 
-        action = self.action(x)
-        action = torch.cat([torch.sigmoid(action[:, 0]).unsqueeze(1), torch.tanh(action[:, 1]).unsqueeze(1)], dim=1)
+        action_r = torch.sigmoid(self.action_r(x))
+        action_theta = torch.tanh(self.action_theta(x))
+
+        action = torch.cat([action_r, action_theta], dim=1)
+
         return action
 
     def initialize_weights(self):
@@ -164,15 +168,15 @@ class Critic(nn.Module):
 
 class TD3(object):
 
-    def __init__(self, state_dim, action_dim, action_lr, critic_lr, model, device):
+    def __init__(self, state_dim, action_dim, action_lr, critic_lr, model1, model2, device):
         self.device = device
         
-        self.actor = Actor(state_dim, model).to(self.device)
+        self.actor = Actor(state_dim, model1).to(self.device)
         self.actor_target = deepcopy(self.actor)
         self.actor_target.load_state_dict(self.actor.state_dict())
         self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=action_lr)
 
-        self.critic = Critic(state_dim, action_dim, model).to(self.device)
+        self.critic = Critic(state_dim, action_dim, model2).to(self.device)
         self.critic_target = deepcopy(self.critic)
         self.critic_target.load_state_dict(self.critic.state_dict())
         self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), lr=critic_lr)
@@ -283,7 +287,8 @@ def make_model():
     critic_lr = 1e-4
     device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
-    conv_model = ConvNet()
-    agent = TD3(state_dim, action_dim, action_lr, critic_lr, conv_model, device)
+    actor_model = ConvNet()
+    critic_model = ConvNet()
+    agent = TD3(state_dim, action_dim, action_lr, critic_lr, actor_model, critic_model, device)
 
     return agent
