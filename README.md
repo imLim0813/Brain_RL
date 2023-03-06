@@ -100,3 +100,15 @@
 #### 학습된 모델과 뇌 데이터 간의 상관관계
 <img src="./README/untrained_VE.png" >
 
+### 2. 표현 유사 분석
+
+#### 가설 : 강화학습 모델이 위계적인 처리과정을 보인다면, 초기 layer는 인간의 시각피질과, 중간 layer는 후두정엽 PPC와, 마지막 layer는 motor cortex와 상관관계가 높을 것이다.
+
+#### 결과 : 위계적인 정보 처리 방식은 보이지 못하였으나, 학습된 모델이 그렇지 않은 모델보다 유의미한 차이로 뇌 데이터와 상관관계가 존재했다.
+
+<img src="./README/early_visual.png">
+<br>
+<img src="./README/ppc.png">
+<br>
+<img src="./README/motor_cortex.png">
+<br>
