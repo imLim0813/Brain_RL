@@ -30,7 +30,7 @@
 - 본 프로젝트는 사람의 뇌 데이터와 강화학습 모델의 출력 간 상관관계를 구하는 것이다. 이 과정은 사람의 뇌 데이터를 수집하기 위해 진행하였다.
 <br>
 
-<img src="./README/experiment.jpg" width="350" height="200"/>
+<img src="./README/experiment.jpg" width="60%" height="60%"/>
 
 ### 2. 실험 환경
 <br>
@@ -57,7 +57,7 @@
 - 실험은 아래와 같이, 6개의 run으로 구성되고, 각 run은 20개의 trial을 가진다.
 <br><br>
 
-<img src="./README/exp_spec.png" width="500" height="250"/>
+<img src="./README/exp_spec.png" width="60%" height="60%"/>
 <br><br>
 
 ## 강화학습 모델
@@ -76,13 +76,22 @@
 
 - reward : 타겟과 커서 간의 유클리디안 거리를 가우시안 함수의 입력으로 사용하여 얻은 출력 값으로 정의하였다. 이 보상의 범위는 $0 < reward < 1$ 이다. 정규 분포 함수의 파라미터인 $\sigma = 100$ 으로 설정하였다.
 
-<img src="./README/reward.png" width="340" height="200"/>
+<img src="./README/reward.png" width="60%" height="60%"/>
 
 ### 3. 입력 데이터 전처리
 
 - 사람이 어떤 시각적인 정보를 볼 때 모든 영역을 동일한 가치를 두는 것이 아닌 핵심적인 정보를 담고 있는 영역에 더욱 가치를 둔다는 attention에서 영감을 얻어 이미지 Cropping을 진행하였다. (1920 x 1080 이미지를 84 x 84로 Cropping)
 
-<img src="./README/image preproc.png" width="500" height="150"/>
+<img src="./README/image preproc.png"  width="60%" height="60%"/>
 
 ### 4. 강화학습 모델 구조
-<img src="./README/Network Architecture.png">
+<img src="./README/Network Architecture.png" width="60%" height="60%"/>
+
+### 5. 강화학습 모델 결과
+
+- 다양한 입력을 이용하여 실험한 결과, 4프레임을 한번의 입력으로 사용할 때 행동정책이 사람과 가장 유사했다.
+
+<img src="./README/Action Policy.png" width="60%" height="60%"/>
+<br><br>
+
+<img src="./README/Action Policy Correlation.png" width="60%" height="60%"/>
