@@ -1,4 +1,4 @@
-import os, sys, cv2, pickle
+import os, sys, cv2, pickle, argparse
 import nibabel as nib
 import pygame as G
 import numpy as np
@@ -13,7 +13,8 @@ from nilearn import image
 from nilearn.glm.first_level import make_first_level_design_matrix, FirstLevelModel
 from nilearn.glm.first_level import compute_regressor
 from nilearn.plotting import plot_design_matrix
-from Anlz.utils_anlz import cal_theta, euclidean_distance
+from utils_anlz import cal_theta, euclidean_distance
+from pil_video import make_video
 
 
 class Behavior_Anlz:
@@ -112,7 +113,8 @@ class Behavior_Anlz:
             png.load()
 
             background = Image.new("RGB", png.size, (255, 255, 255))
-            background.paste(png, mask=list(png.split())[3])
+            
+            background.paste(png)
             frame.append(background)
         G.quit()
 
@@ -374,3 +376,28 @@ class Data_Load:
 
         return features
 
+
+if __name__ == '__main__':
+    """
+    Parameters:
+        subj_name: str
+        root_dir: Path
+        run : int
+        trial : int
+        mode : ['base', 'adap']
+
+    """
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--subj_name', type=str, default='AG01')
+    parser.add_argument('--root_dir', type=str, default='/home/imlim/Documents/Project/Brain_RL/')
+    parser.add_argument('--run', type=int, default=1)
+    parser.add_argument('--trial', type=int, default=1)
+    parser.add_argument('--mode', type=str, default='Base')
+
+    args = parser.parse_args()
+
+    behavior = Behavior_Anlz(args.subj_name, args.root_dir)
+    behavior.make_Image(run=args.run, trial=args.trial)
+    behavior.make_Video(run=args.run, trial=args.trial)
+    behavior.make_LearningCurve(args.mode)
