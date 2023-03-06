@@ -9,7 +9,7 @@ import matplotlib.patches as mpatches
 
 from glob import glob
 from numpy import mean
-from Anlz.utils_anlz import cal_theta, euclidean_distance
+from utils_anlz import cal_theta, euclidean_distance
 from pathlib import Path
 
 class RSA_Anlz:
