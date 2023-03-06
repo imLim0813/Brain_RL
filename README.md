@@ -89,9 +89,12 @@
 
 ### 5. 강화학습 모델 결과
 
-- 다양한 입력을 이용하여 실험한 결과, 4프레임을 한번의 입력으로 사용할 때 행동정책이 사람과 가장 유사했다.
+#### Action Policy Histogram
 
 <img src="./README/Action Policy.png" width="60%" height="60%"/>
 <br><br>
 
+#### Action Policy Correlation
 <img src="./README/Action Policy Correlation.png" width="60%" height="60%"/>
+
+## 
