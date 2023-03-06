@@ -1,9 +1,11 @@
-import glob, matplotlib
+import matplotlib, argparse, warnings
 import matplotlib.pyplot as plt
 import numpy as np
 
 from pathlib import Path
-from Anlz.utils_anlz import cal_theta, euclidean_distance
+from utils_anlz import cal_theta, euclidean_distance
+from Human import *
+from glob import glob
 
 class Policy_Anlz:
     """
@@ -169,8 +171,8 @@ class Policy_Anlz:
 
         """
         for path in glob(str(Path(self.root_dir, 'Result', 'DRL_model', '*'))):
-            name = path.split('/')[-2]
-            data = np.load(Path(path, 'Action.npy'))
+            name = path.split('/')[-1]
+            data = np.load(Path(path, 'DRL_action.npy'))
 
             plt.rc('font', size=8)
             RL_action = data
@@ -185,22 +187,29 @@ class Policy_Anlz:
                     DRL_action.append(RL_action[:, 1][idx] + 360)
                 else:
                     DRL_action.append(RL_action[:, 1][idx])
-            DRL_action[:, 1] = np.array(DRL_action)
+            RL_action[:, 1] = np.array(DRL_action)
 
             save_path = Path(self.save_dir, 'DRL_model', name)
             save_path.mkdir(parents=True ,exist_ok=True)
 
             # Radian distribution
-            plt.hist(DRL_action[:, 0])
+            plt.rc('font', size=8)
+            plt.xlim(0, 6)
+            plt.hist(RL_action[:, 0])
             plt.title('{}_r'.format(name))
             plt.savefig(Path(save_path, 'RADIAN.jpg'), dpi=300)
+            plt.close('all')
 
             # Theta distribution
-            plt.hist(DRL_action[:, 1])
+            plt.rc('font', size=8)
+            plt.xlim(0, 361)
+            plt.hist(RL_action[:, 1])
             plt.title('{}_theta'.format(name))
             plt.savefig(Path(save_path, 'THETA.jpg'), dpi=300)
+            plt.close('all')
 
             # Policy distribution
+            plt.rc('font', size=8)
             r = RL_action[:, 0]
             theta = RL_action[:, 1]
             rad = np.deg2rad(theta)
@@ -210,12 +219,15 @@ class Policy_Anlz:
 
             hist, _, _ = np.histogram2d(rad, r, bins=(abins, rbins))
             A, R = np.meshgrid(abins, rbins)
+            
             fig, ax = plt.subplots(subplot_kw=dict(projection='polar'), figsize=(8, 8))
             normalize = matplotlib.colors.LogNorm()
+
             pc = ax.pcolormesh(A, R, hist.T, cmap='Oranges', norm=normalize)
-            cb = fig.colorbar(pc)
+            fig.colorbar(pc)
             ax.grid(True)
             plt.savefig(Path(save_path, 'Policy.jpg'), dpi=300)
+            plt.close('all')
 
             self.corr_dict[name] = hist.T.reshape(-1, 1)
 
@@ -235,7 +247,7 @@ class Policy_Anlz:
         save_path.mkdir(parents=True ,exist_ok=True)
 
         plt.rc('font', size=8)
-        self.corr_dict = dict(sorted(self.corr_dict.items()))
+        corr_list = []
         for name in self.corr_dict.keys():
             for name_ in self.corr_dict.keys():
                 corr_list.append(np.corrcoef(self.corr_dict[name].reshape(-1), self.corr_dict[name_].reshape(-1))[0][1])
@@ -254,7 +266,30 @@ class Policy_Anlz:
         ax.set_yticklabels([''] + list(self.corr_dict.keys()))
         plt.xticks(rotation=30)
         plt.savefig(Path(save_path, 'Correlation.jpg'), dpi=300)
+        plt.close('all')
 
         return True
 
 
+if __name__ == '__main__':
+    """
+    Parameters:
+        subj_name: str
+        root_dir: Path
+
+    """
+    warnings.filterwarnings('ignore')
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--subj_name', type=str, default='AG01')
+    parser.add_argument('--root_dir', type=str, default='/home/imlim/Documents/Project/Brain_RL/')
+
+    args = parser.parse_args()
+
+    data = Data_Load(args.subj_name, args.root_dir)
+
+    policy = Policy_Anlz(args.subj_name, args.root_dir, data)
+    policy.Human_Policy()
+    policy.Target_policy()
+    policy.DRL_policy()
+    policy.corr_matrix()
